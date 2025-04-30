@@ -35,9 +35,6 @@ export class ProductResponseService {
 
   getProductByIdSlug(id: string): Observable<Product> {
     return this.http.get<Product>(`${baseUrl}/products/${id}`)
-    .pipe(
-      tap((response) => console.log('Product fetched:', response)),
-    );
   }
 
 }

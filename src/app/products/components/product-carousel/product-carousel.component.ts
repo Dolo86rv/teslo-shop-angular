@@ -4,7 +4,7 @@ import Swiper from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { Navigation, Pagination, Scrollbar } from 'swiper/modules';
+import { Navigation, Pagination } from 'swiper/modules';
 
 @Component({
   selector: 'product-carousel',
@@ -30,7 +30,7 @@ export class ProductCarouselComponent implements AfterViewInit {
       direction: 'horizontal',
       loop: true,
 
-      modules: [Pagination, Navigation, Scrollbar],
+      modules: [Pagination, Navigation],
 
       // If we need pagination
       pagination: {
