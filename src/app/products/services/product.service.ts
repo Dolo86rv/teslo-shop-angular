@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Product, ProductResponse } from '../intefaces/product-response.interface';
 import { HttpClient } from '@angular/common/http';
-import { delay, Observable, of, tap } from 'rxjs';
+import { Observable, of, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 const baseUrl = environment.baseUrl;
@@ -49,7 +49,6 @@ export class ProductResponseService {
     }
 
     return this.http.get<Product>(`${baseUrl}/products/${id}`).pipe(
-      delay(2000),
       tap((producto) => this.productCache.set(id, producto)),
     )
   }
