@@ -13,7 +13,6 @@ import { PaginationService } from '@shared/components/pagination/pagination.serv
 export class HomePageComponent {
 
   productsService = inject(ProductResponseService);
-
   paginationService = inject(PaginationService);
   /*activateRoute = inject(ActivatedRoute);
   currentPage = toSignal(
