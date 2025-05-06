@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProductCarouselComponent } from '@products/components/product-carousel/product-carousel.component';
@@ -23,6 +23,13 @@ export class ProductDetailsComponent implements OnInit{
   router = inject(Router);
 
   wasSaved = signal(false);
+  tempImage = signal<string[]>([]);
+  imageFileList: FileList | undefined = undefined;
+  imageToCarousel = computed(() => {
+    const currentProductImages = [...this.product().images, ...this.tempImage()];
+
+    return currentProductImages;
+  })
 
   fb = inject(FormBuilder);
   productForm = this.fb.group({
@@ -64,14 +71,17 @@ export class ProductDetailsComponent implements OnInit{
     if ( this.product().id === 'new') {
       //Crear producto
       const product = await firstValueFrom(
-        this.productService.createProduct(productLike)
+        this.productService.createProduct(productLike, this.imageFileList)
       );
       this.router.navigate(['/admin/products', product.id]);
 
     } else {
 
        await firstValueFrom(
-        this.productService.updateProduct(productLike, this.product().id)
+        this.productService.updateProduct(
+          productLike,
+          this.product().id,
+          this.imageFileList)
       );
     }
 
@@ -95,8 +105,18 @@ export class ProductDetailsComponent implements OnInit{
 
   sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
+
+  //Images
+  onFilesChanged(event: Event) {
+    const files = (event.target as HTMLInputElement).files;
+    this.imageFileList = files ?? undefined;
+
+    const imageUrl = Array.from(files ?? []).map(
+      file => URL.createObjectURL(file));
+
+    this.tempImage.set(imageUrl);
+  }
+
  }
-function Parcial<T>(value: Partial<{ title: string | null; description: string | null; slug: string | null; price: number | null; stock: number | null; sizes: string[] | null; images: null; tags: string | null; gender: string | null; }>) {
-  throw new Error('Function not implemented.');
-}
+
 
