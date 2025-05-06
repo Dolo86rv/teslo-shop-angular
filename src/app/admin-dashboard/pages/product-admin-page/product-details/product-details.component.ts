@@ -1,10 +1,12 @@
-import { Component, inject, input, OnInit } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ProductCarouselComponent } from '@products/components/product-carousel/product-carousel.component';
 import { Product } from '@products/intefaces/product-response.interface';
 import { ProductResponseService } from '@products/services/product.service';
 import { FormErrorLabelComponent } from '@shared/components/form-error-label/form-error-label.component';
 import { FormUtils } from '@utils/form-utils';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'product-details',
@@ -18,6 +20,9 @@ import { FormUtils } from '@utils/form-utils';
 export class ProductDetailsComponent implements OnInit{
   product = input.required<Product>();
   productService = inject(ProductResponseService);
+  router = inject(Router);
+
+  wasSaved = signal(false);
 
   fb = inject(FormBuilder);
   productForm = this.fb.group({
@@ -42,7 +47,7 @@ export class ProductDetailsComponent implements OnInit{
     this.productForm.patchValue({tags: formLike.tags?.join(', ')});
   }
 
-  onSubmit() {
+  async onSubmit() {
     const isValid = this.productForm.valid;
     if (!isValid) {
       this.productForm.markAllAsTouched();
@@ -55,11 +60,26 @@ export class ProductDetailsComponent implements OnInit{
       ?.toLowerCase()
         .split(',').map(tag => tag.trim()) ?? [],
     }
-    this.productService.updateProduct(productLike, this.product().id)
-      .subscribe((product) => {
-        console.log('Producto actualizado', product);
-      }
-    );
+
+    if ( this.product().id === 'new') {
+      //Crear producto
+      const product = await firstValueFrom(
+        this.productService.createProduct(productLike)
+      );
+      this.router.navigate(['/admin/products', product.id]);
+
+    } else {
+
+       await firstValueFrom(
+        this.productService.updateProduct(productLike, this.product().id)
+      );
+    }
+
+    this.wasSaved.set(true);
+    setTimeout(() => {
+      this.wasSaved.set(false);
+    }
+    , 3000);
   }
 
   onSizeClicked(size : string) {
